@@ -1,6 +1,6 @@
 <template>
   <v-menu offset-y>
-    <template v-slot:activator="{ on }">
+    <template #activator="{ on }">
       <v-list-item v-on="on" link class="userbar-activator primary darken-1">
         <v-list-item-avatar width="40" height="40" min-width="40" min-height="40">
           <v-avatar width="40" height="40" min-width="40" min-height="40">

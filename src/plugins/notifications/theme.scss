@@ -1,0 +1,124 @@
+@keyframes notifyEnter {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes notifyLeave {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+.notitication-cantainer {
+  font-family: "Roboto", sans-serif;
+  line-height: 1.5;
+  position: fixed;
+  bottom: 0;
+  right: 16px;
+  width: 33.33%;
+
+  .v-alert__icon {
+    margin-right: 16px;
+  }
+
+  .success {
+    background-color: #4caf50 !important;
+    border-color: #4caf50 !important;
+  }
+
+  .warning {
+    background-color: #ff9800 !important;
+    border-color: #ff9800 !important;
+  }
+
+  .error {
+    background-color: #f44336 !important;
+    border-color: #f44336 !important;
+  }
+
+  .info {
+    background-color: #03a9f4 !important;
+    border-color: #03a9f4 !important;
+  }
+
+  .v-alert {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 16px;
+    padding: 16px;
+    position: relative;
+    -webkit-transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+    transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+    animation-duration: .3s;
+
+    &.notify-enter {
+      animation-name: notifyEnter;
+    }
+
+    &.notify-leave {
+      animation-name: notifyLeave;
+    }
+  
+    .v-alert__wrapper {
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+      border-radius: inherit;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+  
+      .v-icon,
+      .v-alert__content {
+        margin-right: 16px;
+      }
+  
+      .v-alert__content {
+        -webkit-box-flex: 1;
+            -ms-flex: 1 1 auto;
+                flex: 1 1 auto;
+      }
+  
+      .v-alert__dismissible {
+        margin: -16px -8px -16px 8px;
+      }
+  
+      .v-alert__icon {
+        -ms-flex-item-align: start;
+            align-self: flex-start;
+        border-radius: 50%;
+        height: 24px;
+        min-width: 24px;
+        position: relative;
+        margin-right: 16px;
+      }
+  
+      .v-alert--text {
+        background: transparent !important;
+      }
+      .v-alert--text:before {
+        background-color: currentColor;
+        border-radius: inherit;
+        bottom: 0;
+        content: "";
+        left: 0;
+        opacity: 0.12;
+        position: absolute;
+        pointer-events: none;
+        right: 0;
+        top: 0;
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 <template>
-  <content-wrapper-with-title title="My Blogs">
+  <content-wrapper-with-title title="Posts">
     <search-box v-model="search">
-      <v-btn elevation="0" dark color="success" class="ml-4" link to="/blogs/create">
+      <v-btn elevation="0" dark color="success" class="ml-4" link :to="`/${bid}/post/create`">
         <v-icon left>mdi-plus</v-icon>
         Create
       </v-btn>
@@ -12,15 +12,19 @@
         :headers="!isLoading ? headers : undefined"
         :loading="isLoading"
         loading-text="Loading... Please wait."
-        :items="!isLoading ? blogs : undefined"
+        :items="!isLoading ? posts : undefined"
         :search="search"
       >
         <template #item.title="{ item }">
           <router-link
-            :to="`/${item.bid}/dashboard`"
+            :to="`/${bid}/post/${item.pid}`"
           >
             {{ item.title }}
           </router-link>
+        </template>
+
+        <template #item.publishDate="{ item }">
+          {{ item.publishDate.toLocaleDateString() }}
         </template>
       </v-data-table>
     </v-sheet>
@@ -28,19 +32,24 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Modules as StoreModules } from '@/store/root-types';
-import { BlogListItem, State as BlogsModuleState, Types as BlogsStoreTypes } from '@/store/modules/blogs';
+import { State as BlogsModuleState } from '@/store/modules/blogs';
+import { State as PostsModuleState, PostListItem } from '@/store/modules/posts';
 
 @Component({
-  name: 'index-view',
+  name: 'posts-view',
   components: {
     ContentWrapperWithTitle: () => import('@/components/ContentWrapperWithTitle.vue'),
     SearchBox: () => import('@/components/SearchBox.vue'),
   },
 })
-export default class IndexView extends Vue {
+export default class PostsView extends Vue {
+  @Prop({ default: '' }) readonly bid!: string;
+
   blogsStoreModule: BlogsModuleState = this.$store.state[StoreModules.blogs];
+
+  postsStoreModule: PostsModuleState = this.$store.state[StoreModules.posts];
 
   isLoading: boolean = true;
 
@@ -54,34 +63,31 @@ export default class IndexView extends Vue {
       value: 'title',
     },
     {
-      text: 'Owner',
+      text: 'Author',
       filterable: false,
       align: 'start',
-      value: 'owner',
+      value: 'author',
     },
     {
-      text: 'Authors',
+      text: 'Comments',
       filterable: false,
       align: 'center',
-      value: 'authors',
+      value: 'comments',
     },
     {
-      text: 'Posts',
+      text: 'Published',
       filterable: false,
       align: 'center',
-      value: 'posts',
+      value: 'publishDate',
     },
   ];
 
-  get blogs(): BlogListItem[] {
-    return this.blogsStoreModule.blogList;
+  get posts(): PostListItem[] {
+    return this.postsStoreModule.postList;
   }
 
-  beforeMount() {
-    this.$store.dispatch(`${StoreModules.blogs}/${BlogsStoreTypes.actions.GET_BLOGS}`)
-      .then(() => {
-        this.isLoading = false;
-      });
+  mounted() {
+    setTimeout(() => { this.isLoading = false; }, 1000);
   }
 }
 </script>

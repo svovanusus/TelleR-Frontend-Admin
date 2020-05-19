@@ -5,7 +5,11 @@
     <left-navbar v-if="isAuthorized" />
 
     <v-content>
-      <router-view />
+      <v-sheet class="px-4 py-2" light tile>
+        <v-fade-transition hide-on-leave>
+          <router-view />
+        </v-fade-transition>
+      </v-sheet>
     </v-content>
 
     <!--main-footer />-->
@@ -15,24 +19,22 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
 
-import TopNavbar from '@/layouts/TopNavbar.vue';
-import LeftNavbar from '@/layouts/LeftNavbar.vue';
-import MainFooter from '@/layouts/MainFooter.vue';
-import { RootState } from '@/store';
+import { Modules as StoreModules } from '@/store/root-types';
+import { State as AuthStoreState } from '@/store/modules/auth';
 
 @Component({
   name: 'app',
   components: {
-    TopNavbar,
-    LeftNavbar,
-    MainFooter,
+    TopNavbar: () => import('@/layouts/TopNavbar.vue'),
+    LeftNavbar: () => import('@/layouts/LeftNavbar.vue'),
+    MainFooter: () => import('@/layouts/MainFooter.vue'),
   },
 })
 export default class App extends Vue {
-  storeRootState: RootState = this.$store.state;
+  authStoreState: AuthStoreState = this.$store.state[StoreModules.auth];
 
   get isAuthorized(): boolean {
-    return this.storeRootState.isAuthorized;
+    return this.authStoreState.isAuthorized;
   }
 }
 </script>

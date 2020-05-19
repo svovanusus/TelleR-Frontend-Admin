@@ -25,33 +25,32 @@
         </v-list-item>
       </v-list-item-group>
     </v-list>
-    <v-divider></v-divider>
-    <v-list-item class="py-2">
-      <v-list-item-title class="title text-center">Selected blog</v-list-item-title>
-    </v-list-item>
-    <v-list subheader>
-      <v-list-item-group color="secondary">
-        <v-list-item
-          v-for="item in blogSectionItems"
-          :key="'blog-nav-' + item.title"
-          link
-          :to="item.url"
-        >
-          <v-list-item-icon>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list-item-group>
-    </v-list>
+    <template v-if="isShowBlogSection">
+      <v-divider></v-divider>
+      <v-list subheader>
+        <v-list-item-group color="secondary">
+          <v-list-item
+            v-for="item in blogSectionItems"
+            :key="'blog-nav-' + item.title"
+            link
+            :to="item.url"
+          >
+            <v-list-item-icon>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </template>
   </v-navigation-drawer>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator';
-import { RootState } from '@/store';
+import { RootState } from '@/store/root-types';
 
 import NavigationItem from '@/entities/NavigationItem';
 
@@ -74,28 +73,38 @@ export default class LeftNavbar extends Vue {
     },
   ];
 
-  blogSectionItems: NavigationItem[] = [
-    {
-      title: 'Dashboard',
-      icon: 'mdi-view-dashboard',
-      url: '/:bid/dashboard',
-    },
-    {
-      title: 'Blog info',
-      icon: 'mdi-information-variant',
-      url: '/:bid/info',
-    },
-    {
-      title: 'Authors',
-      icon: 'mdi-account-group',
-      url: '/:bid/authors',
-    },
-    {
-      title: 'Posts',
-      icon: 'mdi-newspaper-variant-multiple',
-      url: '/:bid/posts',
-    },
-  ];
+  get blogSectionItems(): NavigationItem[] {
+    return [
+      {
+        title: 'Dashboard',
+        icon: 'mdi-view-dashboard',
+        url: `/${this.currentBlogId}/dashboard`,
+      },
+      {
+        title: 'Blog info',
+        icon: 'mdi-information-variant',
+        url: `/${this.currentBlogId}/info`,
+      },
+      {
+        title: 'Authors',
+        icon: 'mdi-account-group',
+        url: `/${this.currentBlogId}/authors`,
+      },
+      {
+        title: 'Posts',
+        icon: 'mdi-newspaper-variant-multiple',
+        url: `/${this.currentBlogId}/posts`,
+      },
+    ];
+  }
+
+  get isShowBlogSection():boolean {
+    return this.storeRootState.currentBlogId !== undefined;
+  }
+
+  get currentBlogId(): number {
+    return Number(this.storeRootState.currentBlogId);
+  }
 
   get isShown():boolean | null {
     return this.storeRootState.isLeftNavbarOpen;

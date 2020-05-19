@@ -11,7 +11,7 @@
       @click.stop="isLeftNavbarShown = !isLeftNavbarShown"
       class="hidden-md-and-up"
     />
-    <v-toolbar-title class="pl-md-0">TelleR</v-toolbar-title>
+    <v-toolbar-title class="pl-md-0">TelleR{{ blogName }} - ADMIN</v-toolbar-title>
     <v-spacer />
     <user-bar v-if="isAuthorized" />
   </v-app-bar>
@@ -26,7 +26,8 @@
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
-import { RootState } from '@/store';
+import { RootState, Modules as StoreModules, Modules } from '@/store/root-types';
+import { State as AuthStoreState } from '@/store/modules/auth';
 
 import UserBar from '@/layouts/UserBar.vue';
 
@@ -39,8 +40,14 @@ import UserBar from '@/layouts/UserBar.vue';
 export default class TopNavbar extends Vue {
   storeRootState: RootState = this.$store.state;
 
+  authStoreState: AuthStoreState = this.$store.state[Modules.auth];
+
+  get blogName(): string {
+    return this.isAuthorized && this.storeRootState.currentBlogId && this.storeRootState.currentBlogName.trim().length ? `:${this.storeRootState.currentBlogName}` : '';
+  }
+
   get isAuthorized(): boolean {
-    return this.storeRootState.isAuthorized;
+    return this.authStoreState.isAuthorized;
   }
 
   get isLeftNavbarShown(): boolean | null {

@@ -1,12 +1,29 @@
 import { PluginObject } from 'vue';
 import Axios from 'axios';
 
-const axiosInterceptors: PluginObject<unknown> = {
-  install(Vue) {
+import store from '@/store';
+import { Modules as StoreModules, RootTypes } from '@/store/root-types';
+import { State as AuthStoreState, Types as AuthStoreTypes } from '@/store/modules/auth';
+
+import { NotifyApi } from './notifications';
+
+interface AxiosInterceptorsOptopns {
+  notify: NotifyApi;
+}
+
+const axiosInterceptors: PluginObject<AxiosInterceptorsOptopns> = {
+  install(Vue, options) {
+    Axios.interceptors.request.use((config) => {
+      const authState: AuthStoreState = (<any>store).state[StoreModules.auth];
+      if (authState.token) config.headers.Authorization = `Bearer ${authState.token}`;
+      else delete config.headers.Authorization;
+      return config;
+    }, err => Promise.reject(err));
+
     Axios.interceptors.response.use(val => val, (err) => {
       if (!err.response) {
-        // console.log('UNKNOWN ERROR!');
-        return;
+        if (options) options.notify.error('Server is unavailable right now. Please try latter');
+        return null;
       }
 
       switch (err.response.status) {
@@ -28,6 +45,8 @@ const axiosInterceptors: PluginObject<unknown> = {
         default:
           break;
       }
+
+      return err.response;
     });
   },
 };
