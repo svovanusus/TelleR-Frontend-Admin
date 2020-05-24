@@ -10,7 +10,7 @@ import notify from './plugins/notifications';
 import './assets/scss/main.scss';
 
 Vue.use(notify);
-Vue.use(AxiosInterceptors, { notify: Vue.prototype.$notify });
+Vue.use(AxiosInterceptors, { notify: Vue.prototype.$notify, router });
 
 Vue.config.productionTip = false;
 

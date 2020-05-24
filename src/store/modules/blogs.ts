@@ -42,17 +42,16 @@ const module: Module<State, RootState> = {
     },
   },
   actions: {
-    [Types.actions.ADD_BLOG]: async (context, newBlog: CreateBlogRequestDto) => {
-      const response = await BlogService.createNew(newBlog);
+    [Types.actions.ADD_BLOG]: async (context, model: {
+      blog: CreateBlogRequestDto,
+      onSuccess: (msg: string) => void,
+      onError: (msg: string) => void,
+    }) => {
+      const response = await BlogService.createNew(model.blog);
       if (response) {
-        const newBlogListItem: BlogListItem = {
-          bid: response.data.id,
-          title: response.data.title,
-          owner: response.data.author.fullName,
-          posts: 0,
-          authors: 1,
-        };
-        context.commit(Types.mutations.PUSH_NEW_BLOG, newBlogListItem);
+        if (response.data.isError) {
+          if (typeof model.onError !== 'undefined') model.onError(response.data.messages.join('<br>'));
+        } else if (typeof model.onSuccess !== 'undefined') model.onSuccess('New blog successfully created.');
       }
     },
     [Types.actions.GET_BLOGS]: async (context) => {
@@ -64,7 +63,7 @@ const module: Module<State, RootState> = {
             bid: item.id,
             authors: 1,
             owner: item.author.fullName,
-            posts: 0,
+            posts: item.postsCount,
             title: item.title,
           })),
         );

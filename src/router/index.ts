@@ -3,6 +3,7 @@ import VueRouter, { RouteConfig } from 'vue-router';
 import store from '@/store';
 import { Modules as StoreModules, RootTypes } from '@/store/root-types';
 import { State as AuthStoreState, Types as AuthStoreTypes } from '@/store/modules/auth';
+import { Types as UserStoreTypes } from '@/store/modules/user';
 
 Vue.use(VueRouter);
 
@@ -30,25 +31,14 @@ const routes: RouteConfig[] = [
     component: () => import('@/views/Profile.vue'),
   },
   {
-    path: '/settings',
-    name: 'settings',
-    component: () => import('@/views/UserSettings.vue'),
-  },
-  {
     path: '/blogs/create',
     name: 'blogs-create',
     component: () => import('@/views/blog/Edit.vue'),
   },
   {
-    path: '/:bid/dashboard',
-    name: 'dashboard',
-    component: () => import('@/views/blog/Dashboard.vue'),
-    props: true,
-  },
-  {
     path: '/:bid/info',
     name: 'blog-info',
-    component: () => import('@/views/blog/BlogInfo.vue'),
+    component: () => import('@/views/blog/Edit.vue'),
     props: true,
   },
   {
@@ -69,6 +59,11 @@ const routes: RouteConfig[] = [
     component: () => import('@/views/blog/PostEditor.vue'),
     props: true,
   },
+  {
+    path: '/errors/403',
+    name: 'error-403',
+    component: () => import('@/views/403.vue'),
+  },
 ];
 
 const router = new VueRouter({
@@ -77,22 +72,48 @@ const router = new VueRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+let loadingTimer: number | null = null;
+
+router.beforeEach(async (to, from, next) => {
+  if (loadingTimer) clearTimeout(loadingTimer);
+  loadingTimer = setTimeout(() => {
+    store.commit(RootTypes.mutations.SET_PAGE_LOADING, true);
+    loadingTimer = null;
+  }, 500);
+
   if (to.path === '/logout') {
-    store.dispatch(`${StoreModules.auth}/${AuthStoreTypes.actions.LOGOUT}`);
+    await store.dispatch(`${StoreModules.auth}/${AuthStoreTypes.actions.LOGOUT}`);
     next({ name: 'auth' });
     return;
   }
 
   const authState: AuthStoreState = (<any>store).state[StoreModules.auth];
-  store.commit(RootTypes.mutations.SET_CURRENT_BLOG_ID, Number(to.params.bid));
-  store.commit(RootTypes.mutations.SET_CURRENT_BLOG_NAME, to.params.bid ? `Selected(${to.params.bid})` : '');
+  if (authState.isAuthorized) {
+    await store.dispatch(`${StoreModules.user}/${UserStoreTypes.actions.GET_USER_INFO}`);
+  } else {
+    store.commit(`${StoreModules.user}/${UserStoreTypes.mutations.CLEAR_USER_INFO}`);
+  }
+
   if (to.name !== 'auth' && to.name !== 'signup' && !authState.isAuthorized) next({ name: 'auth' });
-  else if (to.name === 'auth' && authState.isAuthorized) next({ name: 'index' });
-  else next();
+  else if ((to.name === 'auth' || to.name === 'signup') && authState.isAuthorized) next({ name: 'index' });
+
+  if (Object.keys(to.params).indexOf('bid') > -1) {
+    await store.dispatch(RootTypes.actions.GET_CURRENT_BLOG_NAME, Number(to.params.bid));
+    await store.dispatch(RootTypes.actions.GET_AVAILABILITY_TO_EDIT_BLOG, Number(to.params.bid));
+  } else {
+    store.commit(RootTypes.mutations.SET_CURRENT_BLOG_ID, 0);
+    store.commit(RootTypes.mutations.SET_CURRENT_BLOG_NAME, '');
+  }
+
+  next();
 });
 
-// eslint-disable-next-line no-underscore-dangle
-(<any>window).__VUE_ROUTER = router;
+router.afterEach((to, from) => {
+  if (loadingTimer) {
+    clearTimeout(loadingTimer);
+    loadingTimer = null;
+  }
+  store.commit(RootTypes.mutations.SET_PAGE_LOADING, false);
+});
 
 export default router;

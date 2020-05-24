@@ -33,9 +33,8 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator';
-import { Modules as StoreModules } from '@/store/root-types';
-import { State as BlogsModuleState } from '@/store/modules/blogs';
-import { State as PostsModuleState, PostListItem } from '@/store/modules/posts';
+import { Modules as StoreModules, RootState } from '@/store/root-types';
+import { State as PostsModuleState, Types as PostsStoreTypes, PostListItem } from '@/store/modules/posts';
 
 @Component({
   name: 'posts-view',
@@ -47,7 +46,7 @@ import { State as PostsModuleState, PostListItem } from '@/store/modules/posts';
 export default class PostsView extends Vue {
   @Prop({ default: '' }) readonly bid!: string;
 
-  blogsStoreModule: BlogsModuleState = this.$store.state[StoreModules.blogs];
+  rootStoreModule: RootState = this.$store.state;
 
   postsStoreModule: PostsModuleState = this.$store.state[StoreModules.posts];
 
@@ -75,7 +74,7 @@ export default class PostsView extends Vue {
       value: 'comments',
     },
     {
-      text: 'Published',
+      text: 'Created',
       filterable: false,
       align: 'center',
       value: 'publishDate',
@@ -87,7 +86,10 @@ export default class PostsView extends Vue {
   }
 
   mounted() {
-    setTimeout(() => { this.isLoading = false; }, 1000);
+    this.$store.dispatch(`${StoreModules.posts}/${PostsStoreTypes.actions.GET_POSTS}`, this.rootStoreModule.currentBlogId)
+      .then(() => {
+        this.isLoading = false;
+      });
   }
 }
 </script>

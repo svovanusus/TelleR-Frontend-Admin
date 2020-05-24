@@ -13,7 +13,7 @@
           aria-hidden="true"
           :class="`v-icon notranslate v-alert__icon mdi theme--dark ${icon}`"
         ></i>
-        <div class="v-alert__content"> {{ message }} </div>
+        <div class="v-alert__content" v-html="message"></div>
         <button
           type="button"
           class="

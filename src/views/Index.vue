@@ -1,5 +1,7 @@
 <template>
   <content-wrapper-with-title title="My Blogs">
+    <author-invite-notifications class="my-4" />
+
     <search-box v-model="search">
       <v-btn elevation="0" dark color="success" class="ml-4" link to="/blogs/create">
         <v-icon left>mdi-plus</v-icon>
@@ -17,7 +19,7 @@
       >
         <template #item.title="{ item }">
           <router-link
-            :to="`/${item.bid}/dashboard`"
+            :to="`/${item.bid}/posts`"
           >
             {{ item.title }}
           </router-link>
@@ -37,6 +39,7 @@ import { BlogListItem, State as BlogsModuleState, Types as BlogsStoreTypes } fro
   components: {
     ContentWrapperWithTitle: () => import('@/components/ContentWrapperWithTitle.vue'),
     SearchBox: () => import('@/components/SearchBox.vue'),
+    AuthorInviteNotifications: () => import('@/components/AuthorInviteNotifications.vue'),
   },
 })
 export default class IndexView extends Vue {

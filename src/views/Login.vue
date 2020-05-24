@@ -32,10 +32,10 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn text color="error" to="/signup">
+        <v-btn text color="error" to="/signup" :disabled="isSending">
           Sign-up
         </v-btn>
-        <v-btn dark depressed color="success" type="submit">
+        <v-btn dark depressed color="success" type="submit" :loading="isSending">
           Sign-in
         </v-btn>
       </v-card-actions>
@@ -56,6 +56,8 @@ import { Types as AuthStoreTypes } from '@/store/modules/auth';
 export default class LoginView extends Vue {
   @Ref('authForm') readonly authForm!: any;
 
+  isSending: boolean = false;
+
   isFormValid: boolean = true;
 
   login: string = '';
@@ -65,15 +67,19 @@ export default class LoginView extends Vue {
   onSubmit() {
     this.authForm.validate();
     if (this.isFormValid) {
+      this.isSending = true;
+
       this.$store.dispatch(`${StoreModules.auth}/${AuthStoreTypes.actions.LOGIN}`, {
         login: this.login,
         password: this.password,
         onSuccess: (msg: string) => {
           this.$notify.success(msg);
+          this.isSending = false;
           this.$router.push('/');
         },
         onError: (msg: string) => {
           this.$notify.error(msg);
+          this.isSending = false;
         },
       });
     }

@@ -265,6 +265,7 @@ export default class TextEditor extends Vue {
         this.htmlContent = getHTML();
       },
     });
+    this.$emit('loaded');
   }
 
   beforeDestroy() {

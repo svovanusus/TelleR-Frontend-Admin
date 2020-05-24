@@ -14,7 +14,7 @@
           </v-avatar>
         </v-list-item-avatar>
         <v-list-item-content>
-          <v-list-item-title>User name <v-icon>mdi-menu-down</v-icon></v-list-item-title>
+          <v-list-item-title>{{ fullName }} <v-icon>mdi-menu-down</v-icon></v-list-item-title>
         </v-list-item-content>
       </v-list-item>
     </template>
@@ -49,12 +49,16 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
 import NavigationItem from '@/entities/NavigationItem';
+import { Modules as StoreModules } from '@/store/root-types';
+import { State as UserStoreState } from '@/store/modules/user';
 
 @Component({
   name: 'user-bar',
   components: {},
 })
 export default class UserBar extends Vue {
+  userStoreState: UserStoreState = this.$store.state[StoreModules.user];
+
   userbarNavItems: NavigationItem[] = [
     {
       title: 'Profile',
@@ -62,15 +66,14 @@ export default class UserBar extends Vue {
       url: '/profile',
     },
     {
-      title: 'Settings',
-      icon: 'mdi-cog',
-      url: '/settings',
-    },
-    {
       title: 'Logout',
       icon: 'mdi-logout',
       url: '/logout',
     },
   ];
+
+  get fullName(): string {
+    return this.userStoreState.fullName;
+  }
 }
 </script>

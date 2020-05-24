@@ -62,10 +62,10 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn text color="error" to="login">
+        <v-btn text color="error" to="login" :disabled="isSending">
           Sign-in
         </v-btn>
-        <v-btn dark depressed color="success" type="submit">
+        <v-btn dark depressed color="success" type="submit" :loading="isSending">
           Sign-up
         </v-btn>
       </v-card-actions>
@@ -78,7 +78,7 @@
 import { Vue, Component, Ref } from 'vue-property-decorator';
 import { Modules as StoreModules } from '@/store/root-types';
 import { Types as AuthStoreTypes } from '@/store/modules/auth';
-import SignupRequestDto from '../entities/dto/request/signup-request-dto';
+import SignupRequestDto from '@/entities/dto/request/signup-request-dto';
 
 interface FormField<T> {
   maxLength: number,
@@ -92,6 +92,8 @@ interface FormField<T> {
 })
 export default class SignupView extends Vue {
   @Ref('signupForm') readonly signupForm!: any;
+
+  isSending: boolean = false;
 
   isFormValid: boolean = true;
 
@@ -143,9 +145,9 @@ export default class SignupView extends Vue {
 
   onSubmit() {
     this.signupForm.validate();
-    console.log('SUBMIT EVENT');
-    console.log(this.isFormValid);
     if (this.isFormValid) {
+      this.isSending = true;
+
       const model: SignupRequestDto = {
         username: this.username.value,
         password: this.password.value,
@@ -157,8 +159,26 @@ export default class SignupView extends Vue {
 
       this.$store.dispatch(`${StoreModules.auth}/${AuthStoreTypes.actions.SIGNUP}`, {
         data: model,
-        onSuccess: () => this.$notify.success('SIGNUP SUCCESS'),
-        onError: (errs: string[]) => this.$notify.error(errs.join('<br>')),
+        onSuccess: () => {
+          this.$notify.success('You are successfully signing up.');
+          this.$store.dispatch(`${StoreModules.auth}/${AuthStoreTypes.actions.LOGIN}`, {
+            login: model.username,
+            password: model.password,
+            onSuccess: (msg: string) => {
+              this.$notify.success(msg);
+              this.$router.push('/');
+              this.isSending = false;
+            },
+            onError: (msg: string) => {
+              this.$notify.error(msg);
+              this.isSending = false;
+            },
+          });
+        },
+        onError: (errs: string[]) => {
+          this.$notify.error(errs.join('<br>'));
+          this.isSending = false;
+        },
       });
     }
   }

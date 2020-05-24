@@ -13,13 +13,16 @@
     </v-content>
 
     <!--main-footer />-->
+    <v-overlay :value="isLoading">
+      <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
   </v-app>
 </template>
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
 
-import { Modules as StoreModules } from '@/store/root-types';
+import { Modules as StoreModules, RootState } from '@/store/root-types';
 import { State as AuthStoreState } from '@/store/modules/auth';
 
 @Component({
@@ -31,7 +34,13 @@ import { State as AuthStoreState } from '@/store/modules/auth';
   },
 })
 export default class App extends Vue {
+  rootStoreState: RootState = this.$store.state;
+
   authStoreState: AuthStoreState = this.$store.state[StoreModules.auth];
+
+  get isLoading(): boolean {
+    return this.rootStoreState.isLoading;
+  }
 
   get isAuthorized(): boolean {
     return this.authStoreState.isAuthorized;

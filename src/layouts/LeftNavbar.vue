@@ -73,23 +73,28 @@ export default class LeftNavbar extends Vue {
     },
   ];
 
+  get isCurrentBlogAvailableToEdit(): boolean {
+    return this.storeRootState.currentBlogAvailableToEdit;
+  }
+
   get blogSectionItems(): NavigationItem[] {
-    return [
+    return this.isCurrentBlogAvailableToEdit ? [
       {
-        title: 'Dashboard',
-        icon: 'mdi-view-dashboard',
-        url: `/${this.currentBlogId}/dashboard`,
-      },
-      {
-        title: 'Blog info',
-        icon: 'mdi-information-variant',
-        url: `/${this.currentBlogId}/info`,
+        title: 'Posts',
+        icon: 'mdi-newspaper-variant-multiple',
+        url: `/${this.currentBlogId}/posts`,
       },
       {
         title: 'Authors',
         icon: 'mdi-account-group',
         url: `/${this.currentBlogId}/authors`,
       },
+      {
+        title: 'Blog info',
+        icon: 'mdi-information-variant',
+        url: `/${this.currentBlogId}/info`,
+      },
+    ] : [
       {
         title: 'Posts',
         icon: 'mdi-newspaper-variant-multiple',
@@ -99,11 +104,11 @@ export default class LeftNavbar extends Vue {
   }
 
   get isShowBlogSection():boolean {
-    return this.storeRootState.currentBlogId !== undefined;
+    return !!this.storeRootState.currentBlogId;
   }
 
-  get currentBlogId(): number {
-    return Number(this.storeRootState.currentBlogId);
+  get currentBlogId(): number | undefined {
+    return this.storeRootState.currentBlogId;
   }
 
   get isShown():boolean | null {
