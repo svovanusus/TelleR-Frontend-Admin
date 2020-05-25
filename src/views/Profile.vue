@@ -5,10 +5,54 @@
         <v-col cols="4">
           <v-card>
             <v-card-title>Avatar</v-card-title>
-            <v-card-text>Image here</v-card-text>
+            <v-card-text>
+              <v-responsive aspect-ratio="1/1">
+                <v-img
+                  :src="avatar"
+                />
+              </v-responsive>
+            </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn dark elevation="0" color="success">Change</v-btn>
+              <v-dialog max-width="350" v-model="avatarDialog">
+                <template #activator="{ on }">
+                  <v-btn dark block elevation="0" color="accent" class="mt-n4" v-on="on">
+                    Change
+                  </v-btn>
+                </template>
+                <v-card>
+                  <v-card-title>Avatar upload</v-card-title>
+                  <v-card-text>
+                    <v-file-input
+                      :rules="rules"
+                      v-model="selectedAvatar"
+                      accept="image/png, image/jpeg, image/bmp"
+                      placeholder="Pick an avatar"
+                      prepend-icon="mdi-camera"
+                      label="Avatar"
+                    ></v-file-input>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      text
+                      color="error"
+                      :disabled="isAvatarUploading"
+                      @click.prevent.stop="avatarDialogClose"
+                    >
+                      Cancel
+                    </v-btn>
+                    <v-btn
+                      text
+                      color="success"
+                      :loading="isAvatarUploading"
+                      @click.prevent.stop="avatarDialogUpload"
+                    >
+                      Upload
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -135,9 +179,11 @@
 import { Vue, Component, Ref } from 'vue-property-decorator';
 import { RootState, Modules as StoreModules } from '@/store/root-types';
 import { State as AuthStoreState, Types as AuthStoreTypes } from '@/store/modules/auth';
+import { State as UserStoreState, Types as UserStoreTypes } from '@/store/modules/user';
 import UpdateUserInfoRequestDto from '@/entities/dto/request/update-user-info-request-dto';
 import UpdatePasswordRequestDto from '@/entities/dto/request/update-password-request-dto';
-import UserService from '../services/api/user-service';
+import UserService from '@/services/api/user-service';
+import Config from '@/config';
 
 interface FormField<T> {
   maxLength: number,
@@ -157,6 +203,12 @@ export default class ProfileView extends Vue {
 
   @Ref('passwordForm') readonly passwordForm!: any;
 
+  userStoreState: UserStoreState = this.$store.state[StoreModules.user];
+
+  avatarDialog: boolean = false;
+
+  isAvatarUploading: boolean = false;
+
   isInfoFormOpened: boolean = true;
 
   isPasswordFormOpened: boolean = false;
@@ -168,6 +220,12 @@ export default class ProfileView extends Vue {
   isInfoFormValid: boolean = true;
 
   isPasswordFormValid: boolean = true;
+
+  selectedAvatar: any = null;
+
+  rules = [
+    (v: any) => (!v || v.size < 2000000 || 'Avatar size should be less than 2 MB!'),
+  ];
 
   username: FormField<string> = {
     maxLength: 30,
@@ -219,6 +277,30 @@ export default class ProfileView extends Vue {
     maxLength: 30,
     validationRules: [],
     value: '',
+  }
+
+  get avatar(): string {
+    return this.userStoreState.avatar && this.userStoreState.avatar.length ? this.userStoreState.avatar : `${Config.BASE_FILE_STORAGE_URL}/img/user-avatar.png`;
+  }
+
+  avatarDialogClose() {
+    this.selectedAvatar = null;
+    this.avatarDialog = false;
+    this.isAvatarUploading = false;
+  }
+
+  avatarDialogUpload() {
+    if (this.selectedAvatar) {
+      this.isAvatarUploading = true;
+      UserService.uploadAvatar(this.selectedAvatar).then((response) => {
+        if (response && response.data) {
+          this.$store.commit(`${StoreModules.user}/${UserStoreTypes.mutations.SET_AVATAR}`, response.data.filePath);
+        }
+        this.avatarDialogClose();
+      }).catch((data) => {
+        this.avatarDialogClose();
+      });
+    }
   }
 
   onSubmitInfoForm() {

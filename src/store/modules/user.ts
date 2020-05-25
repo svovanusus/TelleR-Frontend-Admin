@@ -7,6 +7,7 @@ import UserService from '@/services/api/user-service';
 export interface State {
   userId: number,
   role: UserRole,
+  avatar: string,
   fullName: string,
 }
 
@@ -15,6 +16,7 @@ export const Types = {
   mutations: {
     SET_USER_INFO: 'SET_USER_INFO',
     CLEAR_USER_INFO: 'CLEAR_USER_INFO',
+    SET_AVATAR: 'SET_AVATAR',
   },
   actions: {
     GET_USER_INFO: 'GET_USER_INFO',
@@ -26,6 +28,7 @@ const module: Module<State, RootState> = {
   state: {
     userId: 0,
     role: UserRole.Guest,
+    avatar: '',
     fullName: 'Guset',
   },
   getters: {},
@@ -33,12 +36,17 @@ const module: Module<State, RootState> = {
     [Types.mutations.SET_USER_INFO]: (state, data: State) => {
       state.userId = data.userId;
       state.role = data.role;
+      state.avatar = data.avatar;
       state.fullName = data.fullName;
     },
     [Types.mutations.CLEAR_USER_INFO]: (state) => {
       state.userId = 0;
       state.role = UserRole.Guest;
+      state.avatar = '';
       state.fullName = 'Guest';
+    },
+    [Types.mutations.SET_AVATAR]: (state, avatar?: string) => {
+      state.avatar = avatar !== undefined ? avatar : '';
     },
   },
   actions: {
@@ -49,6 +57,7 @@ const module: Module<State, RootState> = {
         const newState: State = {
           userId: response.data.userId,
           role: response.data.role,
+          avatar: response.data.avatar !== undefined ? response.data.avatar : '',
           fullName: response.data.fullName,
         };
 

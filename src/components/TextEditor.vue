@@ -128,56 +128,72 @@
             <v-icon>mdi-minus</v-icon>
           </v-btn>
 
-          <v-btn
-            icon
-            @click="addLinkModal = true"
-          >
-            <v-icon>mdi-link</v-icon>
-          </v-btn>
-          <v-btn
-            icon
-            @click="addImageModal = true"
-          >
-            <v-icon>mdi-image</v-icon>
-          </v-btn>
+          <v-dialog v-model="addLinkModal">
+            <template #activator="{ on }">
+              <v-btn icon v-on="on">
+                <v-icon>mdi-link</v-icon>
+              </v-btn>
+            </template>
+            <v-card>
+              <v-card-title>Link</v-card-title>
+              <v-card-text>link form</v-card-text>
+              <v-card-actions>
+                <v-spacer />
+                <v-btn text color="secondary" @click="addLinkModal = false">
+                  Cancel
+                </v-btn>
+                <v-btn text color="primary" @click="addLinkModal = false">
+                  Save
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+
+          <v-dialog v-model="addImageModal" max-width="400">
+            <template #activator="{ on }">
+              <v-btn icon v-on="on">
+                <v-icon>mdi-image</v-icon>
+              </v-btn>
+            </template>
+            <v-card>
+              <v-card-title>Image upload</v-card-title>
+              <v-card-text>
+                <v-file-input
+                  :rules="imageRules"
+                  v-model="selectedImage"
+                  accept="image/png, image/jpeg, image/bmp"
+                  placeholder="Pick an avatar"
+                  prepend-icon="mdi-camera"
+                  label="Image"
+                ></v-file-input>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  text
+                  color="error"
+                  :disabled="isImageUploading"
+                  @click.prevent.stop="imageDialogClose"
+                >
+                  Cancel
+                </v-btn>
+                <v-btn
+                  text
+                  color="success"
+                  :loading="isImageUploading"
+                  @click.prevent.stop="imageDialogUpload(commands.image)"
+                >
+                  Upload
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </div>
       </editor-menu-bar>
     </v-toolbar>
-    <v-card-text>
+    <v-card-text class="editor">
       <editor-content :editor="editor" />
     </v-card-text>
-
-    <v-dialog v-model="addLinkModal">
-      <v-card>
-        <v-card-title>Link</v-card-title>
-        <v-card-text>link form</v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text color="secondary" @click="addLinkModal = false">
-            Cancel
-          </v-btn>
-          <v-btn text color="primary" @click="addLinkModal = false">
-            Save
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="addImageModal">
-      <v-card>
-        <v-card-title>Upload Image</v-card-title>
-        <v-card-text>upload image form</v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text color="secondary" @click="addImageModal = false">
-            Cancel
-          </v-btn>
-          <v-btn text color="primary" @click="addImageModal = false">
-            Save
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-card>
 </template>
 
@@ -185,6 +201,12 @@
 blockquote {
   border-left: 2px solid #000;
   padding-left: 12px;
+}
+</style>
+
+<style lang="scss" scoped>
+.editor::v-deep img {
+  width: 100%;
 }
 </style>
 
@@ -212,6 +234,8 @@ import {
   TrailingNode,
 } from 'tiptap-extensions';
 
+import FileService from '@/services/api/file-service';
+
 @Component({
   name: 'text-editor',
   components: {
@@ -235,6 +259,33 @@ export default class TextEditor extends Vue {
   addLinkModal: boolean = false;
 
   addImageModal: boolean = false;
+
+  isImageUploading: boolean = false;
+
+  imageRules = [
+    (v: any) => (!v || v.size < 2000000 || 'Image size should be less than 2 MB!'),
+  ];
+
+  selectedImage: any = null;
+
+  imageDialogClose() {
+    this.addImageModal = false;
+    this.isImageUploading = false;
+    this.selectedImage = null;
+  }
+
+  imageDialogUpload(cmd: Function) {
+    if (this.selectedImage) {
+      FileService.upload(this.selectedImage).then((response) => {
+        if (response) cmd({ src: response.data.filePath });
+        else this.$notify.error('Error occured while uploading image.');
+        this.imageDialogClose();
+      }).catch((data) => {
+        this.$notify.error('Error occured while uploading image.');
+        this.imageDialogClose();
+      });
+    }
+  }
 
   mounted() {
     this.editor = new Editor({

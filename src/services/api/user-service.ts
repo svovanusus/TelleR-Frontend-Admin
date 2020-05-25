@@ -5,6 +5,7 @@ import SignupResponseDto from '@/entities/dto/response/signup-response-dto';
 import UserInfoForEditResponseDto from '@/entities/dto/response/user-info-for-edit-response';
 import UpdateUserInfoRequestDto from '@/entities/dto/request/update-user-info-request-dto';
 import UpdatePasswordRequestDto from '@/entities/dto/request/update-password-request-dto';
+import FileUploadResponseDto from '@/entities/dto/response/file-upload-response-dto';
 
 const USER_CONTROLLER_PATH = 'users';
 
@@ -23,5 +24,15 @@ export default class UserService {
 
   static changeUserPassword(data: UpdatePasswordRequestDto) {
     return Axios.put<SignupResponseDto>(`${Config.BASE_API_URL}/${USER_CONTROLLER_PATH}/changePassword`, data);
+  }
+
+  static uploadAvatar(file: any) {
+    const data = new FormData();
+    data.append('file', file);
+    return Axios.post<FileUploadResponseDto>(`${Config.BASE_API_URL}/${USER_CONTROLLER_PATH}/uploadAvatar`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   }
 }

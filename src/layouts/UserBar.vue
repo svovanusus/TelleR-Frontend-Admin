@@ -5,7 +5,7 @@
         <v-list-item-avatar width="40" height="40" min-width="40" min-height="40">
           <v-avatar width="40" height="40" min-width="40" min-height="40">
             <v-img
-              src="@/assets/img/user-avatar.png"
+              :src="avatar"
               width="40"
               height="40"
               min-width="40"
@@ -51,6 +51,7 @@ import { Vue, Component } from 'vue-property-decorator';
 import NavigationItem from '@/entities/NavigationItem';
 import { Modules as StoreModules } from '@/store/root-types';
 import { State as UserStoreState } from '@/store/modules/user';
+import Config from '@/config';
 
 @Component({
   name: 'user-bar',
@@ -74,6 +75,10 @@ export default class UserBar extends Vue {
 
   get fullName(): string {
     return this.userStoreState.fullName;
+  }
+
+  get avatar(): string {
+    return this.userStoreState.avatar && this.userStoreState.avatar.length ? this.userStoreState.avatar : `${Config.BASE_FILE_STORAGE_URL}/img/user-avatar.png`;
   }
 }
 </script>
