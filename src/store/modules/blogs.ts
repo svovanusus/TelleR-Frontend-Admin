@@ -5,6 +5,7 @@ import CreateBlogRequestDto from '@/entities/dto/request/create-blog-request-dto
 
 export interface BlogListItem {
   bid: number,
+  name: string,
   title: string,
   authors: number,
   owner: string,
@@ -61,6 +62,7 @@ const module: Module<State, RootState> = {
           Types.mutations.SET_BLOG_LIST,
           Array.from(response.data, item => (<BlogListItem>{
             bid: item.id,
+            name: item.name,
             authors: 1,
             owner: item.author.fullName,
             posts: item.postsCount,

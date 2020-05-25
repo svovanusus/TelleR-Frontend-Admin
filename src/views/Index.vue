@@ -24,6 +24,12 @@
             {{ item.title }}
           </router-link>
         </template>
+
+        <template #item.actions="{ item }">
+          <v-btn link icon :href="`https://teller.website/@${item.name}`">
+            <v-icon>mdi-open-in-new</v-icon>
+          </v-btn>
+        </template>
       </v-data-table>
     </v-sheet>
   </content-wrapper-with-title>
@@ -73,6 +79,13 @@ export default class IndexView extends Vue {
       filterable: false,
       align: 'center',
       value: 'posts',
+    },
+    {
+      text: '',
+      filterable: false,
+      sortable: false,
+      align: 'end',
+      value: 'actions',
     },
   ];
 
