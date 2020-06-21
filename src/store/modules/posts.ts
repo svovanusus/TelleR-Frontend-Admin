@@ -8,8 +8,8 @@ export interface PostListItem {
   pid: number,
   title: string,
   author: string,
-  comments: number,
   publishDate: Date,
+  isPublished: boolean,
 }
 
 export interface State {
@@ -51,7 +51,7 @@ const module: Module<State, RootState> = {
           author: response.data.author.fullName,
           title: response.data.title,
           publishDate: new Date(response.data.createDate),
-          comments: 0,
+          isPublished: response.data.publishDate !== null,
         };
         context.commit(Types.mutations.PUSH_NEW_POST, newPostItem);
       }
@@ -66,7 +66,7 @@ const module: Module<State, RootState> = {
             title: item.title,
             publishDate: new Date(item.createDate),
             author: item.author.fullName,
-            comments: 0,
+            isPublished: item.publishDate !== null,
           })),
         );
       }

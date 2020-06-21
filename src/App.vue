@@ -12,7 +12,6 @@
       </v-sheet>
     </v-content>
 
-    <!--main-footer />-->
     <v-overlay :value="isLoading">
       <v-progress-circular indeterminate size="64"></v-progress-circular>
     </v-overlay>
@@ -30,7 +29,6 @@ import { State as AuthStoreState } from '@/store/modules/auth';
   components: {
     TopNavbar: () => import('@/layouts/TopNavbar.vue'),
     LeftNavbar: () => import('@/layouts/LeftNavbar.vue'),
-    MainFooter: () => import('@/layouts/MainFooter.vue'),
   },
 })
 export default class App extends Vue {

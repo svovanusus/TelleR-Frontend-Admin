@@ -52,7 +52,7 @@
       <v-card>
         <v-card-title>Kick author</v-card-title>
         <v-card-text>
-          Are you shure that you want to kick the {{ itemToKick.authorName }}?
+          Are you sure that you want to kick the {{ itemToKick.authorName }}?
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -68,7 +68,7 @@
 import { Vue, Component, Ref } from 'vue-property-decorator';
 import { RootState } from '@/store/root-types';
 import AuthorInviteService from '@/services/api/author-invite-service';
-import BlogService from '../../services/api/blog-service';
+import BlogService from '@/services/api/blog-service';
 
 interface FormField<T> {
   maxLength: number,

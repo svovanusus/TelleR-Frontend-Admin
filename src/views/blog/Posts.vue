@@ -26,6 +26,10 @@
         <template #item.publishDate="{ item }">
           {{ item.publishDate.toLocaleDateString() }}
         </template>
+
+        <template #item.isPublished="{ item }">
+          <v-simple-checkbox v-model="item.isPublished" disabled></v-simple-checkbox>
+        </template>
       </v-data-table>
     </v-sheet>
   </content-wrapper-with-title>
@@ -68,16 +72,16 @@ export default class PostsView extends Vue {
       value: 'author',
     },
     {
-      text: 'Comments',
-      filterable: false,
-      align: 'center',
-      value: 'comments',
-    },
-    {
       text: 'Created',
       filterable: false,
       align: 'center',
       value: 'publishDate',
+    },
+    {
+      text: 'Published',
+      filterable: false,
+      align: 'right',
+      value: 'isPublished',
     },
   ];
 

@@ -1,7 +1,7 @@
 <template>
   <v-card color="white">
     <v-toolbar dark :tile="false">
-      <editor-menu-bar :editor="editor" v-slot="{ commands, isActive  }">
+      <editor-menu-bar :editor="editor" v-slot="{ commands, isActive, getMarkAttrs }">
         <div class="toolbar-controls">
           <v-btn
             icon
@@ -128,21 +128,27 @@
             <v-icon>mdi-minus</v-icon>
           </v-btn>
 
-          <v-dialog v-model="addLinkModal">
+          <v-dialog v-model="addLinkModal" max-width="400">
             <template #activator="{ on }">
-              <v-btn icon v-on="on">
+              <v-btn icon v-on="on" @click="addedLink = getMarkAttrs('link').href">
                 <v-icon>mdi-link</v-icon>
               </v-btn>
             </template>
             <v-card>
-              <v-card-title>Link</v-card-title>
-              <v-card-text>link form</v-card-text>
+              <v-card-title>Add Link</v-card-title>
+              <v-card-text>
+                <v-text-field
+                  v-model="addedLink"
+                  :rules="linkRules"
+                  label="Link URL"
+                ></v-text-field>
+              </v-card-text>
               <v-card-actions>
                 <v-spacer />
-                <v-btn text color="secondary" @click="addLinkModal = false">
+                <v-btn text color="secondary" @click="closeLinkModal">
                   Cancel
                 </v-btn>
-                <v-btn text color="primary" @click="addLinkModal = false">
+                <v-btn text color="primary" @click="addLink(commands.link)">
                   Save
                 </v-btn>
               </v-card-actions>
@@ -162,7 +168,7 @@
                   :rules="imageRules"
                   v-model="selectedImage"
                   accept="image/png, image/jpeg, image/bmp"
-                  placeholder="Pick an avatar"
+                  placeholder="Pick an image"
                   prepend-icon="mdi-camera"
                   label="Image"
                 ></v-file-input>
@@ -268,6 +274,27 @@ export default class TextEditor extends Vue {
 
   selectedImage: any = null;
 
+  addedLink: string = '';
+
+  linkRules = [
+    (v: any) => (v === '' || /^http[s]?:\/\/.+\..+/gm.test(v) || 'Incorrect URL'),
+  ];
+
+  closeLinkModal() {
+    this.addLinkModal = false;
+    this.addedLink = '';
+  }
+
+  addLink(cmd: Function) {
+    if (this.addedLink === '') {
+      cmd({ href: null });
+      this.closeLinkModal();
+    } else if (/^http[s]?:\/\/.+\..+/gm.test(this.addedLink)) {
+      cmd({ href: this.addedLink });
+      this.closeLinkModal();
+    }
+  }
+
   imageDialogClose() {
     this.addImageModal = false;
     this.isImageUploading = false;
@@ -276,6 +303,7 @@ export default class TextEditor extends Vue {
 
   imageDialogUpload(cmd: Function) {
     if (this.selectedImage) {
+      this.isImageUploading = true;
       FileService.upload(this.selectedImage).then((response) => {
         if (response) cmd({ src: response.data.filePath });
         else this.$notify.error('Error occured while uploading image.');

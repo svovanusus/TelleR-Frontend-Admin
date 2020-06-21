@@ -20,38 +20,12 @@
                     Change
                   </v-btn>
                 </template>
-                <v-card>
-                  <v-card-title>Avatar upload</v-card-title>
-                  <v-card-text>
-                    <v-file-input
-                      :rules="rules"
-                      v-model="selectedAvatar"
-                      accept="image/png, image/jpeg, image/bmp"
-                      placeholder="Pick an avatar"
-                      prepend-icon="mdi-camera"
-                      label="Avatar"
-                    ></v-file-input>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      text
-                      color="error"
-                      :disabled="isAvatarUploading"
-                      @click.prevent.stop="avatarDialogClose"
-                    >
-                      Cancel
-                    </v-btn>
-                    <v-btn
-                      text
-                      color="success"
-                      :loading="isAvatarUploading"
-                      @click.prevent.stop="avatarDialogUpload"
-                    >
-                      Upload
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
+                <image-editor
+                  title="Upload avatar"
+                  :loading="isAvatarUploading"
+                  @cancel="avatarDialogClose"
+                  @upload="avatarDialogUpload"
+                />
               </v-dialog>
             </v-card-actions>
           </v-card>
@@ -196,6 +170,7 @@ interface FormField<T> {
   components: {
     ContentWrapperWithTitle: () => import('@/components/ContentWrapperWithTitle.vue'),
     PageButtonsSectionWrapper: () => import('@/components/PageButtonsSectionWrapper.vue'),
+    ImageEditor: () => import('@/components/ImageEditor.vue'),
   },
 })
 export default class ProfileView extends Vue {
@@ -289,15 +264,15 @@ export default class ProfileView extends Vue {
     this.isAvatarUploading = false;
   }
 
-  avatarDialogUpload() {
-    if (this.selectedAvatar) {
+  avatarDialogUpload(canvas: HTMLCanvasElement) {
+    if (canvas) {
       this.isAvatarUploading = true;
-      UserService.uploadAvatar(this.selectedAvatar).then((response) => {
+      UserService.uploadAvatar(canvas, (response) => {
         if (response && response.data) {
           this.$store.commit(`${StoreModules.user}/${UserStoreTypes.mutations.SET_AVATAR}`, response.data.filePath);
         }
         this.avatarDialogClose();
-      }).catch((data) => {
+      }, () => {
         this.avatarDialogClose();
       });
     }

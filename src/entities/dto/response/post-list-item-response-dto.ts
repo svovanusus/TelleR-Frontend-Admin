@@ -7,6 +7,7 @@ interface PostListItemResponseDto {
   content: string,
   author: UserSimpleDto,
   createDate: Date,
+  publishDate: Date,
 }
 
 export default PostListItemResponseDto;
